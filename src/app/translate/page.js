@@ -1,6 +1,6 @@
 // src/app/translate/page.js - 용어 변환 페이지 (API 응답 구조 수정)
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Search, Home, Scale, BookOpen, ArrowRight, Sparkles } from 'lucide-react'
 import { translateLegalTerm } from '@/lib/api'
@@ -11,6 +11,10 @@ export default function TranslatePage() {
   const [result, setResult] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+
+  useEffect(() => {
+    document.title = '법률 용어 변환 - Factos'
+  }, [])
 
   // 검색 실행
   const handleSearch = async () => {
@@ -381,8 +385,8 @@ export default function TranslatePage() {
                     </p>
                   ) : result && typeof result === 'object' ? (
                     <div>
-                      {/* 법률 용어 표시 */}
-                      {result.legalTerm && (
+                      {/* Claude 응답 표시 (새로운 구조) */}
+                      {result.claudeResponse ? (
                         <div style={{ marginBottom: '16px' }}>
                           <h4 style={{
                             fontSize: '14px',
@@ -392,85 +396,88 @@ export default function TranslatePage() {
                             textTransform: 'uppercase',
                             letterSpacing: '0.5px'
                           }}>
-                            법률 용어
+                            설명
                           </h4>
                           <p style={{
                             fontSize: '16px',
                             color: '#374151',
                             lineHeight: '1.7',
                             margin: '0',
-                            fontWeight: '500'
+                            whiteSpace: 'pre-wrap'
                           }}>
-                            {result.legalTerm}
+                            {result.claudeResponse}
                           </p>
                         </div>
-                      )}
-                      
-                      {/* 일반 용어들 표시 */}
-                      {result.generalTerms && Array.isArray(result.generalTerms) && result.generalTerms.length > 0 && (
-                        <div style={{ marginBottom: '16px' }}>
-                          <h4 style={{
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            color: '#6b7280',
-                            margin: '0 0 8px 0',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.5px'
-                          }}>
-                            쉬운 용어
-                          </h4>
-                          <div style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: '8px'
-                          }}>
-                            {result.generalTerms.map((term, index) => (
-                              <span
-                                key={index}
-                                style={{
-                                  display: 'inline-block',
-                                  backgroundColor: '#e0f2fe',
-                                  color: '#0369a1',
-                                  padding: '6px 12px',
-                                  borderRadius: '20px',
-                                  fontSize: '14px',
-                                  fontWeight: '500'
-                                }}
-                              >
-                                {term}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* 컨텍스트 표시 (있을 경우) */}
-                      {result.context && (
-                        <div>
-                          <h4 style={{
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            color: '#6b7280',
-                            margin: '0 0 8px 0',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.5px'
-                          }}>
-                            추가 정보
-                          </h4>
-                          <p style={{
-                            fontSize: '16px',
-                            color: '#374151',
-                            lineHeight: '1.7',
-                            margin: '0',
-                            fontStyle: 'italic'
-                          }}>
-                            {result.context}
-                          </p>
-                        </div>
+                      ) : (
+                        // 기존 구조 (generalTerms, context) - 백워드 호환성
+                        <>
+                          {/* 일반 용어들 표시 */}
+                          {result.generalTerms && Array.isArray(result.generalTerms) && result.generalTerms.length > 0 && (
+                            <div style={{ marginBottom: '16px' }}>
+                              <h4 style={{
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                color: '#6b7280',
+                                margin: '0 0 8px 0',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
+                              }}>
+                                쉬운 용어
+                              </h4>
+                              <div style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '8px'
+                              }}>
+                                {result.generalTerms.map((term, index) => (
+                                  <span
+                                    key={index}
+                                    style={{
+                                      display: 'inline-block',
+                                      backgroundColor: '#e0f2fe',
+                                      color: '#0369a1',
+                                      padding: '6px 12px',
+                                      borderRadius: '20px',
+                                      fontSize: '14px',
+                                      fontWeight: '500'
+                                    }}
+                                  >
+                                    {term}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* 컨텍스트 표시 (있을 경우) */}
+                          {result.context && (
+                            <div>
+                              <h4 style={{
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                color: '#6b7280',
+                                margin: '0 0 8px 0',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
+                              }}>
+                                추가 정보
+                              </h4>
+                              <p style={{
+                                fontSize: '16px',
+                                color: '#374151',
+                                lineHeight: '1.7',
+                                margin: '0',
+                                fontStyle: 'italic'
+                              }}>
+                                {result.context}
+                              </p>
+                            </div>
+                          )}
+                        </>
                       )}
                       
                       {/* 모든 필드가 없거나 빈 경우 */}
-                      {!result.legalTerm && (!result.generalTerms || result.generalTerms.length === 0) && !result.context && (
+                      {!result.claudeResponse && (!result.generalTerms || result.generalTerms.length === 0) && !result.context && (
                         <p style={{
                           fontSize: '16px',
                           color: '#6b7280',

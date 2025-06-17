@@ -18,6 +18,11 @@ export default function ChatPage() {
   const [currentChatId, setCurrentChatId] = useState(null)
   const [isLoaded, setIsLoaded] = useState(false)
 
+  // 페이지 title 설정 (추가)
+  useEffect(() => {
+    document.title = 'AI 법률 상담 - Factos'
+  }, [])
+
   // localStorage에 채팅 세션 저장
   const saveChatSessions = (sessions) => {
     setChatSessions(sessions)

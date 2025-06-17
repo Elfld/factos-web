@@ -114,14 +114,14 @@ export async function sendChatMessageStream(message, onChunk, chatId = null) {
 
 /**
  * 용어 변환 (법률 용어 → 일상 용어)
- * @param {string} legalTerm - 법률 용어
+ * @param {string} SearchingLegalTerm - 법률 용어
  * @returns {Promise<{success: boolean, data?: object, error?: string}>}
  */
-export async function translateLegalTerm(legalTerm) {
+export async function translateLegalTerm(SearchingLegalTerm) {
   try {
     console.log('📤 용어 변환 API 호출:', {
       url: `${API_BASE_URL}/terms/translate`,
-      content: legalTerm
+      legalTerm: SearchingLegalTerm
     })
     
     const response = await fetch(`${API_BASE_URL}/terms/translate`, {
@@ -130,7 +130,7 @@ export async function translateLegalTerm(legalTerm) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        content: legalTerm
+        legalTerm: SearchingLegalTerm
       })
     })
 
