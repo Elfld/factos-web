@@ -53,9 +53,21 @@ export default function ChatArea({
     // 로딩 시작
     setIsLoading(true)
 
+    const USE_DUMMY_RESPONSE = true;
+
     try {
       // API 호출
-      const result = await sendChatMessage(userMessageWithId.text, chat.id)
+      // const result = await sendChatMessage(userMessageWithId.text, chat.id)
+
+      // API대신 더미메시지 받기
+      const dummyResponses = [
+        "안녕하세요! 법률 관련 질문에 답변드리겠습니다.\n 해당 문제는 민법 제750조와 관련이 있습니다.\n 계약서 검토 시 주의사항:\n1. 당사자 권리의무\n2. 손해배상 조항\n3. 해지 조건\n 대법원 2023다1234 판결에 따르면 손해배상 책임이 인정될 수 있습니다."
+      ];
+      const result = {
+        success: true,
+        response: dummyResponses[Math.floor(Math.random() * dummyResponses.length)]
+      }
+      //
       
       if (result.success) {
         // AI 응답 메시지 추가
@@ -66,6 +78,7 @@ export default function ChatArea({
           timestamp: new Date(),
           isError: false
         }
+        
         
         onAddMessage?.(aiMessage)
         
@@ -313,6 +326,7 @@ export default function ChatArea({
 
       {/* CSS 애니메이션 */}
       <style jsx>{`
+        
         @keyframes bounce {
           0%, 80%, 100% { transform: scale(0); }
           40% { transform: scale(1); }

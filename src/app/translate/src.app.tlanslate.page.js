@@ -1,4 +1,4 @@
-// src/app/translate/page.js - 용어 변환 페이지 (API 응답 구조 수정)
+// src/app/translate/page.js - 용어 변환 페이지
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
@@ -6,8 +6,7 @@ import { Search, Home, Scale, BookOpen, ArrowRight, Sparkles } from 'lucide-reac
 import { translateLegalTerm } from '@/lib/api'
 
 export default function TranslatePage() {
-  const [searchTerm, setSearchTerm] = useState('')        // 검색창 입력용
-  const [searchedTerm, setSearchedTerm] = useState('')    // 결과 표시용 (고정)
+  const [searchTerm, setSearchTerm] = useState('')
   const [result, setResult] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -19,7 +18,6 @@ export default function TranslatePage() {
     setIsLoading(true)
     setError(null)
     setResult(null)
-    setSearchedTerm(searchTerm.trim())  // 검색한 용어 고정
 
     try {
       const response = await translateLegalTerm(searchTerm.trim())
@@ -50,11 +48,9 @@ export default function TranslatePage() {
 
   return (
     <div style={{
-      height: '100vh',                    // min-height → height로 변경
+      minHeight: '100vh',
       background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 50%, #e5e7eb 100%)',
-      position: 'relative',
-      overflowY: 'auto',                  // 세로 스크롤 활성화
-      overflowX: 'hidden'                 // 가로 스크롤 숨김
+      position: 'relative'
     }}>
       {/* 홈 버튼 - 우측 상단 */}
       <div style={{
@@ -96,23 +92,18 @@ export default function TranslatePage() {
         </Link>
       </div>
 
-      <div 
-        className="container"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: result || error ? 'flex-start' : 'center',
-          minHeight: '100vh',                                              // 콘텐츠 최소 높이 유지
-          padding: result || error ? '40px 20px 80px' : '40px 20px',
-          paddingTop: result || error ? '80px' : '40px',
-          maxWidth: '1000px',
-          margin: '0 auto',
-          transition: 'all 0.5s ease',
-          width: '100%',                                                   // 전체 너비 사용
-          boxSizing: 'border-box'                                          // 패딩 포함 크기 계산
-        }}
-      >
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: result || error ? 'flex-start' : 'center',
+        minHeight: '100vh',
+        padding: result || error ? '40px 20px 80px' : '40px 20px',
+        paddingTop: result || error ? '80px' : '40px',
+        maxWidth: '1000px',
+        margin: '0 auto',
+        transition: 'all 0.5s ease'
+      }}>
 
         {/* 상단 헤더 */}
         <div style={{
@@ -358,7 +349,7 @@ export default function TranslatePage() {
                       fontWeight: '600',
                       color: '#1e40af'
                     }}>
-                      📖 "{searchedTerm}"
+                      📖 "{searchTerm}"
                     </span>
                   </div>
                 </div>
@@ -381,8 +372,7 @@ export default function TranslatePage() {
                     </p>
                   ) : result && typeof result === 'object' ? (
                     <div>
-                      {/* 법률 용어 표시 */}
-                      {result.legalTerm && (
+                      {result.definition && (
                         <div style={{ marginBottom: '16px' }}>
                           <h4 style={{
                             fontSize: '14px',
@@ -392,22 +382,20 @@ export default function TranslatePage() {
                             textTransform: 'uppercase',
                             letterSpacing: '0.5px'
                           }}>
-                            법률 용어
+                            정의
                           </h4>
                           <p style={{
                             fontSize: '16px',
                             color: '#374151',
                             lineHeight: '1.7',
-                            margin: '0',
-                            fontWeight: '500'
+                            margin: '0'
                           }}>
-                            {result.legalTerm}
+                            {result.definition}
                           </p>
                         </div>
                       )}
                       
-                      {/* 일반 용어들 표시 */}
-                      {result.generalTerms && Array.isArray(result.generalTerms) && result.generalTerms.length > 0 && (
+                      {result.explanation && (
                         <div style={{ marginBottom: '16px' }}>
                           <h4 style={{
                             fontSize: '14px',
@@ -417,35 +405,20 @@ export default function TranslatePage() {
                             textTransform: 'uppercase',
                             letterSpacing: '0.5px'
                           }}>
-                            쉬운 용어
+                            쉬운 설명
                           </h4>
-                          <div style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: '8px'
+                          <p style={{
+                            fontSize: '16px',
+                            color: '#374151',
+                            lineHeight: '1.7',
+                            margin: '0'
                           }}>
-                            {result.generalTerms.map((term, index) => (
-                              <span
-                                key={index}
-                                style={{
-                                  display: 'inline-block',
-                                  backgroundColor: '#e0f2fe',
-                                  color: '#0369a1',
-                                  padding: '6px 12px',
-                                  borderRadius: '20px',
-                                  fontSize: '14px',
-                                  fontWeight: '500'
-                                }}
-                              >
-                                {term}
-                              </span>
-                            ))}
-                          </div>
+                            {result.explanation}
+                          </p>
                         </div>
                       )}
                       
-                      {/* 컨텍스트 표시 (있을 경우) */}
-                      {result.context && (
+                      {result.example && (
                         <div>
                           <h4 style={{
                             fontSize: '14px',
@@ -455,7 +428,7 @@ export default function TranslatePage() {
                             textTransform: 'uppercase',
                             letterSpacing: '0.5px'
                           }}>
-                            추가 정보
+                            예시
                           </h4>
                           <p style={{
                             fontSize: '16px',
@@ -464,20 +437,19 @@ export default function TranslatePage() {
                             margin: '0',
                             fontStyle: 'italic'
                           }}>
-                            {result.context}
+                            {result.example}
                           </p>
                         </div>
                       )}
                       
-                      {/* 모든 필드가 없거나 빈 경우 */}
-                      {!result.legalTerm && (!result.generalTerms || result.generalTerms.length === 0) && !result.context && (
+                      {!result.definition && !result.explanation && !result.example && (
                         <p style={{
                           fontSize: '16px',
-                          color: '#6b7280',
-                          margin: '0',
-                          fontStyle: 'italic'
+                          color: '#374151',
+                          lineHeight: '1.7',
+                          margin: '0'
                         }}>
-                          변환 결과를 표시할 수 없습니다.
+                          {JSON.stringify(result, null, 2)}
                         </p>
                       )}
                     </div>
@@ -593,40 +565,13 @@ export default function TranslatePage() {
             </div>
           </div>
         )}
-              </div>
+      </div>
 
-      {/* CSS 애니메이션 + 반응형 스크롤 대응 */}
+      {/* CSS 애니메이션 */}
       <style jsx>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
-        }
-
-        /* 화면 배율 변경 및 작은 화면 대응 */
-        @media (max-height: 800px) {
-          .container {
-            padding: 20px 16px 40px 16px !important;
-            padding-top: 60px !important;
-          }
-        }
-
-        @media (max-height: 600px) {
-          .container {
-            padding: 15px 12px 30px 12px !important;
-            padding-top: 40px !important;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .container {
-            padding: 30px 16px 50px 16px !important;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .container {
-            padding: 20px 12px 40px 12px !important;
-          }
         }
       `}</style>
     </div>

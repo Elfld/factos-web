@@ -60,17 +60,12 @@ export default function MessageBubble({ message }) {
       {message.text}
     </div>
       
-      {/* 공유 버튼 */}
+      {/* 복사 버튼 */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'flex-end',
-        opacity: '0',
-        transition: 'opacity 0.2s'
-      }}
-      className="group-hover:opacity-100"
-      onMouseEnter={(e) => e.target.style.opacity = '1'}
-      onMouseLeave={(e) => e.target.style.opacity = '0'}
-      >
+        marginTop: '8px'
+      }}>
         <button
           onClick={copyMessage}
           style={{
@@ -79,7 +74,7 @@ export default function MessageBubble({ message }) {
             gap: '4px',
             fontSize: '12px',
             color: '#6b7280',
-            backgroundColor: '#f3f4f6',
+            backgroundColor: 'transparent',
             border: 'none',
             padding: '6px 12px',
             borderRadius: '8px',
@@ -87,12 +82,12 @@ export default function MessageBubble({ message }) {
             transition: 'all 0.2s'
           }}
           onMouseEnter={(e) => {
-            e.target.style.backgroundColor = '#e5e7eb'
-            e.target.style.color = '#374151'
+            e.currentTarget.style.backgroundColor = '#e5e7eb'
+            e.currentTarget.style.color = '#374151'
           }}
           onMouseLeave={(e) => {
-            e.target.style.backgroundColor = '#f3f4f6'
-            e.target.style.color = '#6b7280'
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = '#6b7280'
           }}
         >
           {copied ? (

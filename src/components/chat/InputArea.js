@@ -69,7 +69,7 @@ export default function InputArea({ onSendMessage, isLoading = false }) {
         <div style={{ 
           position: 'relative',
           backgroundColor: 'white',
-          borderRadius: '24px',
+          borderRadius: '18px',
           border: '1px solid #d1d5db',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
           transition: 'all 0.2s',
@@ -92,7 +92,7 @@ export default function InputArea({ onSendMessage, isLoading = false }) {
             onKeyDown={handleKeyPress}
             placeholder="무엇을 도와드릴까요?"
             style={{
-              width: '100%',
+              width: '99.5%',
               resize: 'none',
               border: 'none',
               borderRadius: '24px',
@@ -103,6 +103,7 @@ export default function InputArea({ onSendMessage, isLoading = false }) {
               backgroundColor: 'white',
               minHeight: '24px',
               maxHeight: '120px', // 최대 높이 제한
+              marginTop: '5px',
               overflowY: 'hidden', // 기본은 hidden, 필요시 auto로 변경
               fontFamily: 'inherit',
               boxSizing: 'border-box' // 테두리 포함해서 크기 계산
@@ -118,14 +119,14 @@ export default function InputArea({ onSendMessage, isLoading = false }) {
             disabled={!input.trim() || isLoading}
             style={{
               position: 'absolute',
-              right: '25px',
+              right: '30px',
               bottom: '15px',
               width: '36px',
               height: '36px',
               backgroundColor: input.trim() && !isLoading ? '#3b82f6' : '#d1d5db',
               color: 'white',
               border: 'none',
-              borderRadius: '18px',
+              borderRadius: '12px',
               cursor: input.trim() && !isLoading ? 'pointer' : 'not-allowed',
               transition: 'all 0.2s',
               display: 'flex',
