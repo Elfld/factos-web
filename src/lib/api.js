@@ -11,7 +11,7 @@ export async function sendChatMessage(message, chatId = null) {
   try {
     // chatId를 숫자로 변환 (기본값은 1)
     // const chatRoomId = chatId ? parseInt(chatId) : 1
-    const chatRoomId = 1
+    const chatRoomId = 2
     
     console.log('📤 채팅 API 호출:', {
       url: `${API_BASE_URL}/chat/${chatRoomId}/send`,
@@ -121,7 +121,7 @@ export async function translateLegalTerm(legalTerm) {
   try {
     console.log('📤 용어 변환 API 호출:', {
       url: `${API_BASE_URL}/terms/translate`,
-      content: legalTerm
+      legalTerm: legalTerm
     })
     
     const response = await fetch(`${API_BASE_URL}/terms/translate`, {
@@ -130,7 +130,7 @@ export async function translateLegalTerm(legalTerm) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        content: legalTerm
+        legalTerm: legalTerm
       })
     })
 
