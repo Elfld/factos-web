@@ -4,7 +4,10 @@ import { useState, useRef, useEffect } from 'react'
 import { Menu, MessageSquare, Plus, Home } from 'lucide-react'
 import MessageBubble from './MessageBubble'
 import InputArea from './InputArea'
+import RightSidebar from './RightSidebar'
+import UserProfile from './UserProfile'
 import { sendChatMessage } from '@/lib/api'
+import { USER_PROFILE } from '@/lib/constants'
 import Link from 'next/link'
 
 export default function ChatArea({ 
@@ -17,6 +20,8 @@ export default function ChatArea({
   onToggleSidebar 
 }) {
   const [isLoading, setIsLoading] = useState(false)
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false) // 우측 사이드바 상태
+  const [selectedCase, setSelectedCase] = useState(null) // 선택된 판례
   const messagesEndRef = useRef(null)
 
   // 스크롤 자동 이동
@@ -29,6 +34,17 @@ export default function ChatArea({
     const timestamp = Date.now()
     const random = Math.floor(Math.random() * 10000)
     return `${type}-${timestamp}-${random}`
+  }
+
+  // 판례 클릭 처리
+  const handleCaseClick = (caseItem) => {
+    setSelectedCase(caseItem)
+    setIsRightSidebarOpen(true)
+  }
+
+  // 우측 사이드바 닫기
+  const handleRightSidebarClose = () => {
+    setIsRightSidebarOpen(false)
   }
 
   // 메시지 전송 처리
@@ -57,26 +73,29 @@ export default function ChatArea({
 
     try {
       // API 호출
-      // const result = await sendChatMessage(userMessageWithId.text, chat.id)
+      const result = await sendChatMessage(userMessageWithId.text, chat.id)
 
       // API대신 더미메시지 받기
-      const dummyResponses = [
-        "안녕하세요! 법률 관련 질문에 답변드리겠습니다.\n 해당 문제는 민법 제750조와 관련이 있습니다.\n 계약서 검토 시 주의사항:\n1. 당사자 권리의무\n2. 손해배상 조항\n3. 해지 조건\n 대법원 2023다1234 판결에 따르면 손해배상 책임이 인정될 수 있습니다."
-      ];
-      const result = {
-        success: true,
-        response: dummyResponses[Math.floor(Math.random() * dummyResponses.length)]
-      }
-      //
+      // const dummyResponses = [
+      //   "안녕하세요! 법률 관련 질문에 답변드리겠습니다.\n 해당 문제는 민법 제750조와 관련이 있습니다.\n 계약서 검토 시 주의사항:\n1. 당사자 권리의무\n2. 손해배상 조항\n3. 해지 조건\n 대법원 2023다1234 판결에 따르면 손해배상 책임이 인정될 수 있습니다."
+      // ];
+      // const result = {
+      //   success: true,
+      //   response: dummyResponses[Math.floor(Math.random() * dummyResponses.length)]
+      // }
       
       if (result.success) {
-        // AI 응답 메시지 추가
+        // AI 응답 메시지 추가 (판례 데이터 포함)
         const aiMessage = {
           id: generateMessageId('ai'),
           text: result.response,
           isUser: false,
           timestamp: new Date(),
-          isError: false
+          isError: false,
+          // 판례 데이터 추가
+          casesSummaryList: result.casesSummaryList || [],
+          caseNumbers: result.caseNumbers || [],
+          contextSummary: result.contextSummary || null
         }
         
         
@@ -96,242 +115,264 @@ export default function ChatArea({
   }
 
   return (
-    <>
-      {/* 상단 헤더 */}
-      <div style={{ 
-        height: '48px',
-        padding: '6px 16px 6px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: '#ffffff',
-        borderBottom: chat ? '1px solid #e5e7eb' : 'none',
-        boxShadow: chat ? '0 1px 3px 0 rgba(0, 0, 0, 0.1)' : 'none',
-        position: 'relative'
-      }}>
-        {/* 햄버거 버튼 - 사이드바가 닫혔을 때만 표시, 절대 위치로 X 버튼 자리에 */}
-        {!isSidebarOpen && (
-          <button
-            onClick={onToggleSidebar}
-            style={{
-              position: 'absolute',
-              left: '16px', // 사이드바 padding과 동일
-              top: '50%',
-              transform: 'translateY(-50%)',
-              padding: '8px',
-              backgroundColor: 'transparent',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'background-color 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: '10'
-            }}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-          >
-            <Menu style={{ width: '20px', height: '20px', color: '#374151' }} />
-          </button>
-        )}
-
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          flex: '1',
-          paddingLeft: isSidebarOpen ? '0' : '56px'
-        }}>
-          {chat && (
-            <h1 style={{ 
-              fontSize: '18px', 
-              fontWeight: '600', 
-              color: '#1f2937', 
-              margin: '0',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}>
-              {chat.title}
-            </h1>
-          )}
-        </div>
-
-        {/* 홈 버튼 - 우측 상단 */}
-        <Link href="/">
-          <button
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              backgroundColor: '#3b82f6',
-              border: 'none',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
-              textDecoration: 'none'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#2563eb'
-              e.target.style.transform = 'scale(1.05)'
-              e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)'
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#3b82f6'
-              e.target.style.transform = 'scale(1)'
-              e.target.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)'
-            }}
-          >
-            <Home style={{ width: '20px', height: '20px' }} />
-          </button>
-        </Link>
-      </div>
-
-      {/* 채팅 메시지 영역 */}
+    <div style={{ display: 'flex', height: '100vh' }} data-chat-container>
+      {/* 메인 채팅 영역 */}
       <div style={{ 
         flex: '1', 
-        overflowY: 'auto',
-        backgroundColor: '#ffffff'
+        display: 'flex', 
+        flexDirection: 'column',
+        minWidth: '0',
+        transition: 'all 0.3s ease'
       }}>
-        {(!chat || chat.messages.length === 0) && !chat?.errorMessage ? (
-          // 빈 상태 - 채팅이 없거나 메시지가 없을 때
+        {/* 상단 헤더 */}
+        <div style={{ 
+          height: '48px',
+          padding: '6px 16px 6px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          backgroundColor: '#ffffff',
+          borderBottom: chat ? '1px solid #e5e7eb' : 'none',
+          boxShadow: chat ? '0 1px 3px 0 rgba(0, 0, 0, 0.1)' : 'none',
+          position: 'relative'
+        }}>
+          {/* 햄버거 버튼 - 사이드바가 닫혔을 때만 표시, 절대 위치로 X 버튼 자리에 */}
+          {!isSidebarOpen && (
+            <button
+              onClick={onToggleSidebar}
+              style={{
+                position: 'absolute',
+                left: '16px', // 사이드바 padding과 동일
+                top: '50%',
+                transform: 'translateY(-50%)',
+                padding: '8px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: '10'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            >
+              <Menu style={{ width: '20px', height: '20px', color: '#374151' }} />
+            </button>
+          )}
+
           <div style={{ 
             display: 'flex', 
-            flexDirection: 'column', 
             alignItems: 'center', 
-            justifyContent: 'center', 
-            height: '100%', 
-            textAlign: 'center', 
-            padding: '32px' 
+            flex: '1',
+            paddingLeft: isSidebarOpen ? '0' : '56px'
           }}>
-            {/* 아이콘 변경: 채팅 없음 vs 새 채팅 시작 */}
-            {chatSessions?.length === 0 ? (
-              // 채팅이 아예 없을 때 - Plus 아이콘 (클릭 가능)
+            {chat && (
+              <h1 style={{ 
+                fontSize: '18px', 
+                fontWeight: '600', 
+                color: '#1f2937', 
+                margin: '0',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}>
+                {chat.title}
+              </h1>
+            )}
+          </div>
+
+          {/* 우상단 버튼들 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* 홈 버튼 - 왼쪽으로 이동 */}
+            <Link href="/">
               <button
-                onClick={onNewChat}
                 style={{
-                  width: '64px',
-                  height: '64px',
-                  backgroundColor: '#f3f4f6',
+                  width: '36px',
+                  height: '36px',
                   borderRadius: '50%',
+                  backgroundColor: '#f3f4f6',
+                  border: '1px solid #e5e7eb',
+                  color: '#6b7280',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: '16px',
-                  border: 'none',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                  textDecoration: 'none'
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.backgroundColor = '#e5e7eb'
-                  e.target.style.transform = 'scale(1.05)'
-                  e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)'
+                  e.target.style.color = '#374151'
+                  e.target.style.borderColor = '#d1d5db'
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.backgroundColor = '#f3f4f6'
-                  e.target.style.transform = 'scale(1)'
-                  e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)'
+                  e.target.style.color = '#6b7280'
+                  e.target.style.borderColor = '#e5e7eb'
                 }}
               >
-                <Plus style={{ width: '32px', height: '32px', color: '#6b7280' }} />
+                <Home style={{ width: '18px', height: '18px' }} />
               </button>
-            ) : (
-              // 새 채팅이 있지만 메시지가 없을 때 - MessageSquare 아이콘
-              <MessageSquare style={{ width: '64px', height: '64px', color: '#9ca3af', marginBottom: '16px' }} />
-            )}
-            
-            <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#4b5563', margin: '0 0 8px 0' }}>
-              {chatSessions?.length === 0 ? '새 채팅을 시작해보세요' : '채팅을 시작해보세요'}
-            </h3>
-            <p style={{ color: '#6b7280', maxWidth: '400px', margin: '0', lineHeight: '1.5' }}>
-              {chatSessions?.length === 0 
-                ? '좌측 상단의 "새 채팅" 버튼을 눌러 대화를 시작하세요.' 
-                : '궁금한 것이 있으시면 언제든 물어보세요.'}
-            </p>
+            </Link>
+
+            {/* 기존 UserProfile 컴포넌트에 props 전달 */}
+            <UserProfile {...USER_PROFILE} />
           </div>
-        ) : (
-          // 메시지 리스트
-          <div style={{ maxWidth: '1024px', margin: '0 auto', padding: '24px 16px' }}>
-            {/* 메시지들을 순서대로 렌더링 */}
-            {chat?.messages?.map((message, index) => (
-              <MessageBubble 
-                key={message.id || `message-${index}`} 
-                message={message} 
-              />
-            ))}
+        </div>
 
-            {/* 에러 메시지 표시 (채팅별로 저장된 에러 메시지) */}
-            {chat?.errorMessage && (
-              <div style={{ marginBottom: '32px' }}>
-                <div style={{
-                  color: '#ef4444',
-                  lineHeight: '1.7',
-                  whiteSpace: 'pre-wrap',
-                  marginBottom: '16px',
-                  fontSize: '15px',
-                  padding: '12px',
-                  backgroundColor: '#fef2f2',
-                  borderRadius: '8px',
-                  border: '1px solid #fecaca'
-                }}>
-                  {chat.errorMessage}
-                </div>
-              </div>
-            )}
+        {/* 채팅 메시지 영역 */}
+        <div style={{ 
+          flex: '1', 
+          overflowY: 'auto',
+          backgroundColor: '#ffffff'
+        }}>
+          {(!chat || chat.messages.length === 0) && !chat?.errorMessage ? (
+            // 빈 상태 - 채팅이 없거나 메시지가 없을 때
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              height: '100%', 
+              textAlign: 'center', 
+              padding: '32px' 
+            }}>
+              {/* 아이콘 변경: 채팅 없음 vs 새 채팅 시작 */}
+              {chatSessions?.length === 0 ? (
+                // 채팅이 아예 없을 때 - Plus 아이콘 (클릭 가능)
+                <button
+                  onClick={onNewChat}
+                  style={{
+                    width: '64px',
+                    height: '64px',
+                    backgroundColor: '#f3f4f6',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '16px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = '#e5e7eb'
+                    e.target.style.transform = 'scale(1.05)'
+                    e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = '#f3f4f6'
+                    e.target.style.transform = 'scale(1)'
+                    e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)'
+                  }}
+                >
+                  <Plus style={{ width: '32px', height: '32px', color: '#6b7280' }} />
+                </button>
+              ) : (
+                // 새 채팅이 있지만 메시지가 없을 때 - MessageSquare 아이콘
+                <MessageSquare style={{ width: '64px', height: '64px', color: '#9ca3af', marginBottom: '16px' }} />
+              )}
+              
+              <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#4b5563', margin: '0 0 8px 0' }}>
+                {chatSessions?.length === 0 ? '새 채팅을 시작해보세요' : '채팅을 시작해보세요'}
+              </h3>
+              <p style={{ color: '#6b7280', maxWidth: '400px', margin: '0', lineHeight: '1.5' }}>
+                {chatSessions?.length === 0 
+                  ? '좌측 상단의 "새 채팅" 버튼을 눌러 대화를 시작하세요.' 
+                  : '궁금한 것이 있으시면 언제든 물어보세요.'}
+              </p>
+            </div>
+          ) : (
+            // 메시지 리스트
+            <div style={{ maxWidth: '1024px', margin: '0 auto', padding: '24px 16px' }}>
+              {/* 메시지들을 순서대로 렌더링 */}
+              {chat?.messages?.map((message, index) => (
+                <MessageBubble 
+                  key={message.id || `message-${index}`} 
+                  message={message} 
+                  onCaseClick={handleCaseClick}
+                />
+              ))}
 
-            {/* 로딩 인디케이터 */}
-            {isLoading && (
-              <div style={{ marginBottom: '32px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
-                  <div style={{ display: 'flex', gap: '4px' }}>
-                    <div style={{
-                      width: '8px',
-                      height: '8px',
-                      backgroundColor: '#9ca3af',
-                      borderRadius: '50%',
-                      animation: 'bounce 1.4s ease-in-out infinite both'
-                    }}></div>
-                    <div style={{
-                      width: '8px',
-                      height: '8px',
-                      backgroundColor: '#9ca3af',
-                      borderRadius: '50%',
-                      animation: 'bounce 1.4s ease-in-out 0.16s infinite both'
-                    }}></div>
-                    <div style={{
-                      width: '8px',
-                      height: '8px',
-                      backgroundColor: '#9ca3af',
-                      borderRadius: '50%',
-                      animation: 'bounce 1.4s ease-in-out 0.32s infinite both'
-                    }}></div>
+              {/* 에러 메시지 표시 (채팅별로 저장된 에러 메시지) */}
+              {chat?.errorMessage && (
+                <div style={{ marginBottom: '32px' }}>
+                  <div style={{
+                    color: '#ef4444',
+                    lineHeight: '1.7',
+                    whiteSpace: 'pre-wrap',
+                    marginBottom: '16px',
+                    fontSize: '15px',
+                    padding: '12px',
+                    backgroundColor: '#fef2f2',
+                    borderRadius: '8px',
+                    border: '1px solid #fecaca'
+                  }}>
+                    {chat.errorMessage}
                   </div>
-                  <span style={{ fontSize: '14px' }}>응답을 생성하고 있습니다...</span>
                 </div>
-              </div>
-            )}
+              )}
 
-            <div ref={messagesEndRef} />
-          </div>
-        )}
+              {/* 로딩 인디케이터 */}
+              {isLoading && (
+                <div style={{ marginBottom: '32px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        backgroundColor: '#9ca3af',
+                        borderRadius: '50%',
+                        animation: 'bounce 1.4s ease-in-out infinite both'
+                      }}></div>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        backgroundColor: '#9ca3af',
+                        borderRadius: '50%',
+                        animation: 'bounce 1.4s ease-in-out 0.16s infinite both'
+                      }}></div>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        backgroundColor: '#9ca3af',
+                        borderRadius: '50%',
+                        animation: 'bounce 1.4s ease-in-out 0.32s infinite both'
+                      }}></div>
+                    </div>
+                    <span style={{ fontSize: '14px' }}>응답을 생성하고 있습니다...</span>
+                  </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
+
+        {/* 입력 영역 - 채팅이 있을 때만 표시 */}
+        {chat && <InputArea onSendMessage={handleSendMessage} isLoading={isLoading} />}
+
+        {/* CSS 애니메이션 */}
+        <style jsx>{`
+          
+          @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+          }
+        `}</style>
       </div>
 
-      {/* 입력 영역 - 채팅이 있을 때만 표시 */}
-      {chat && <InputArea onSendMessage={handleSendMessage} isLoading={isLoading} />}
-
-      {/* CSS 애니메이션 */}
-      <style jsx>{`
-        
-        @keyframes bounce {
-          0%, 80%, 100% { transform: scale(0); }
-          40% { transform: scale(1); }
-        }
-      `}</style>
-    </>
+      {/* 우측 사이드바 */}
+      <RightSidebar
+        isOpen={isRightSidebarOpen}
+        onClose={handleRightSidebarClose}
+        selectedCase={selectedCase}
+      />
+    </div>
   )
 }

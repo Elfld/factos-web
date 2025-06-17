@@ -1,13 +1,16 @@
-// src/app/page.js - JS 색상 + CSS 크기 효과
+// src/app/page.js - UserProfile 추가
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { MessageCircle, ArrowRight, Scale, BookOpen, Sparkles } from 'lucide-react'
+import UserProfile from '@/components/chat/UserProfile'
+import { USER_PROFILE } from '@/lib/constants'
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    document.title = 'Factos - 법률 AI 어시스턴트' // 추가
     setMounted(true)
   }, [])
 
@@ -60,6 +63,16 @@ export default function HomePage() {
 
   return (
     <div className="homepage-container">
+      {/* UserProfile - 우상단 */}
+      <div style={{
+        position: 'absolute',
+        top: '20px',
+        right: '20px',
+        zIndex: '10'
+      }}>
+        <UserProfile {...USER_PROFILE} />
+      </div>
+
       <div className="homepage-content">
         
         {/* Hero 섹션 */}

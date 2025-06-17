@@ -1,9 +1,11 @@
-// src/app/translate/page.js - 용어 변환 페이지 (API 응답 구조 수정)
+// src/app/translate/page.js - 용어 변환 페이지 (UserProfile 추가)
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Search, Home, Scale, BookOpen, ArrowRight, Sparkles } from 'lucide-react'
 import { translateLegalTerm } from '@/lib/api'
+import UserProfile from '@/components/chat/UserProfile'
+import { USER_PROFILE } from '@/lib/constants'
 
 export default function TranslatePage() {
   const [searchTerm, setSearchTerm] = useState('')        // 검색창 입력용
@@ -12,6 +14,7 @@ export default function TranslatePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  // 페이지 title 설정
   useEffect(() => {
     document.title = '법률 용어 변환 - Factos'
   }, [])
@@ -60,44 +63,50 @@ export default function TranslatePage() {
       overflowY: 'auto',                  // 세로 스크롤 활성화
       overflowX: 'hidden'                 // 가로 스크롤 숨김
     }}>
-      {/* 홈 버튼 - 우측 상단 */}
+      {/* 우상단 버튼들 */}
       <div style={{
         position: 'absolute',
         top: '20px',
         right: '20px',
-        zIndex: '10'
+        zIndex: '10',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px'
       }}>
+        {/* 홈 버튼 - 왼쪽으로 이동 */}
         <Link href="/">
           <button
             style={{
-              width: '40px',
-              height: '40px',
+              width: '36px',
+              height: '36px',
               borderRadius: '50%',
-              backgroundColor: '#3b82f6',
-              border: 'none',
-              color: 'white',
+              backgroundColor: '#f3f4f6',
+              border: '1px solid #e5e7eb',
+              color: '#6b7280',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
               textDecoration: 'none'
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#2563eb'
-              e.target.style.transform = 'scale(1.05)'
-              e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)'
+              e.target.style.backgroundColor = '#e5e7eb'
+              e.target.style.color = '#374151'
+              e.target.style.borderColor = '#d1d5db'
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#3b82f6'
-              e.target.style.transform = 'scale(1)'
-              e.target.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)'
+              e.target.style.backgroundColor = '#f3f4f6'
+              e.target.style.color = '#6b7280'
+              e.target.style.borderColor = '#e5e7eb'
             }}
           >
-            <Home style={{ width: '20px', height: '20px' }} />
+            <Home style={{ width: '18px', height: '18px' }} />
           </button>
         </Link>
+
+        {/* UserProfile - 원래 홈 버튼 자리 */}
+        <UserProfile {...USER_PROFILE} />
       </div>
 
       <div 

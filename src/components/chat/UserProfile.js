@@ -2,9 +2,14 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import { User, Settings, MoreVertical } from 'lucide-react'
-import { Z_INDEX } from '@/lib/zIndex'
 
-export default function UserProfile() {
+export default function UserProfile({ 
+  displayText = "사용자", 
+  backgroundColor = "#3b82f6",
+  hoverBackgroundColor = "#2563eb",
+  userName = "사용자",
+  userEmail = "user@example.com"
+}) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
 
@@ -43,27 +48,37 @@ export default function UserProfile() {
     <div style={{ 
       position: 'relative'
     }} ref={dropdownRef}>
-      {/* 유저 아이콘 버튼 */}
+      {/* 유저 프로필 버튼 - props로 받은 값들 사용 */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         style={{
           width: '40px',
           height: '40px',
           borderRadius: '50%',
-          backgroundColor: '#3b82f6',
+          backgroundColor: backgroundColor,
           border: 'none',
           color: 'white',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
-          transition: 'background-color 0.2s',
-          boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
+          transition: 'all 0.2s',
+          boxShadow: `0 2px 8px ${backgroundColor}4D`, // 투명도 30%
+          fontSize: '14px',
+          fontWeight: '600'
         }}
-        onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-        onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = hoverBackgroundColor
+          e.target.style.transform = 'scale(1.05)'
+          e.target.style.boxShadow = `0 4px 12px ${backgroundColor}66` // 투명도 40%
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = backgroundColor
+          e.target.style.transform = 'scale(1)'
+          e.target.style.boxShadow = `0 2px 8px ${backgroundColor}4D`
+        }}
       >
-        <User style={{ width: '20px', height: '20px' }} />
+        {displayText}
       </button>
 
       {/* 유저 드롭다운 메뉴 */}
@@ -83,21 +98,24 @@ export default function UserProfile() {
         }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid #f3f4f6' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {/* 드롭다운 내 프로필도 props 사용 */}
               <div style={{
                 width: '32px',
                 height: '32px',
                 borderRadius: '50%',
-                backgroundColor: '#3b82f6',
+                backgroundColor: backgroundColor,
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                fontSize: '12px',
+                fontWeight: '600'
               }}>
-                <User style={{ width: '16px', height: '16px' }} />
+                {displayText}
               </div>
               <div>
-                <div style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>사용자</div>
-                <div style={{ fontSize: '12px', color: '#6b7280' }}>user@example.com</div>
+                <div style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>{userName}</div>
+                <div style={{ fontSize: '12px', color: '#6b7280' }}>{userEmail}</div>
               </div>
             </div>
           </div>

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Copy, Check } from 'lucide-react'
 
-export default function MessageBubble({ message }) {
+export default function MessageBubble({ message, onCaseClick }) {
   const [copied, setCopied] = useState(false)
 
   // 메시지 복사
@@ -15,6 +15,11 @@ export default function MessageBubble({ message }) {
     } catch (err) {
       console.error('복사 실패:', err)
     }
+  }
+
+  // 판례 버튼 클릭
+  const handleCaseClick = (caseItem) => {
+    onCaseClick?.(caseItem)
   }
 
   if (message.isUser) {
@@ -60,48 +65,104 @@ export default function MessageBubble({ message }) {
       {message.text}
     </div>
       
-      {/* 복사 버튼 */}
+      {/* 하단 버튼 영역 */}
       <div style={{ 
         display: 'flex', 
-        justifyContent: 'flex-end',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         marginTop: '8px'
       }}>
-        <button
-          onClick={copyMessage}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            fontSize: '12px',
-            color: '#6b7280',
-            backgroundColor: 'transparent',
-            border: 'none',
-            padding: '6px 12px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#e5e7eb'
-            e.currentTarget.style.color = '#374151'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = '#6b7280'
-          }}
-        >
-          {copied ? (
+        {/* 왼쪽: 판례 버튼들 */}
+        <div style={{ 
+          display: 'flex', 
+          gap: '6px', 
+          flexWrap: 'wrap',
+          alignItems: 'center'
+        }}>
+          {/* 판례가 있을 때만 "판례 참조:" 텍스트와 버튼들 표시 */}
+          {message.casesSummaryList && message.casesSummaryList.length > 0 && (
             <>
-              <Check style={{ width: '12px', height: '12px' }} />
-              <span>복사됨</span>
-            </>
-          ) : (
-            <>
-              <Copy style={{ width: '12px', height: '12px' }} />
-              <span>복사</span>
+              <span style={{ 
+                fontSize: '12px', 
+                color: '#6b7280', 
+                fontWeight: '500',
+                marginRight: '4px'
+              }}>
+                판례 참조:
+              </span>
+              {message.casesSummaryList.map((caseItem, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleCaseClick(caseItem)}
+                  style={{
+                    fontSize: '11px',
+                    padding: '4px 8px',
+                    backgroundColor: '#f3f4f6',
+                    color: '#6b7280',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    fontWeight: '500',
+                    whiteSpace: 'nowrap'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = '#e5e7eb'
+                    e.target.style.color = '#374151'
+                    e.target.style.borderColor = '#d1d5db'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = '#f3f4f6'
+                    e.target.style.color = '#6b7280'
+                    e.target.style.borderColor = '#e5e7eb'
+                  }}
+                >
+                  {caseItem.caseNumber}
+                </button>
+              ))}
             </>
           )}
-        </button>
+        </div>
+
+        {/* 오른쪽: 복사 버튼 */}
+        <div>
+          <button
+            onClick={copyMessage}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '12px',
+              color: '#6b7280',
+              backgroundColor: 'transparent',
+              border: 'none',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#e5e7eb'
+              e.currentTarget.style.color = '#374151'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = '#6b7280'
+            }}
+          >
+            {copied ? (
+              <>
+                <Check style={{ width: '12px', height: '12px' }} />
+                <span>복사됨</span>
+              </>
+            ) : (
+              <>
+                <Copy style={{ width: '12px', height: '12px' }} />
+                <span>복사</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* CSS for hover effect */}

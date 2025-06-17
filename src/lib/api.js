@@ -1,22 +1,21 @@
-// src/lib/api.js - 백엔드 API 연동
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+// src/lib/api.js - 실제 백엔드 API 연동 (판례 데이터 포함)
+const API_BASE_URL = 'http://184.72.180.240/api'
 
 /**
  * 채팅 메시지 전송
  * @param {string} message - 사용자 메시지
- * @param {number} chatId - 채팅 세션 ID (숫자)
+ * @param {string|number} chatId - 채팅 세션 ID (숫자 형태로 변환됨)
  * @returns {Promise<{success: boolean, response: string, error?: string}>}
  */
 export async function sendChatMessage(message, chatId = null) {
   try {
-    // chatId를 숫자로 사용 (기본값은 1)
-    // const chatRoomId = chatId || 1
+    // chatId를 숫자로 변환 (기본값은 1)
+    // const chatRoomId = chatId ? parseInt(chatId) : 1
     const chatRoomId = 1
     
     console.log('📤 채팅 API 호출:', {
       url: `${API_BASE_URL}/chat/${chatRoomId}/send`,
-      userInput: message,
-      chatRoomId: chatRoomId
+      userInput: message
     })
     
     const response = await fetch(`${API_BASE_URL}/chat/${chatRoomId}/send`, {
@@ -38,15 +37,15 @@ export async function sendChatMessage(message, chatId = null) {
     const data = await response.json()
     console.log('📥 응답 데이터:', data)
     
-    // 실제 응답 구조에 맞게 처리
+    // 백엔드 응답 구조에 맞게 처리
     if (data.isSuccess) {
       return {
         success: true,
         response: data.data?.claudeResponse || '응답을 받을 수 없습니다.',
         chatId: chatRoomId,
-        caseNumbers: data.data?.caseNumber || [], // 문자열 배열
+        caseNumbers: data.data?.caseNumber || [],
         contextSummary: data.data?.contextSummary || null,
-        message: data.message || null // API 메시지 추가
+        casesSummaryList: data.data?.casesSummaryList || [] // 판례 상세 정보 추가
       }
     } else {
       return {
@@ -71,7 +70,7 @@ export async function sendChatMessage(message, chatId = null) {
  * 스트리밍 채팅 응답 (현재 백엔드에서 지원하지 않으므로 일반 응답으로 처리)
  * @param {string} message - 사용자 메시지
  * @param {function} onChunk - 텍스트 청크 받을 때마다 호출될 콜백
- * @param {number} chatId - 채팅 세션 ID
+ * @param {string|number} chatId - 채팅 세션 ID
  * @returns {Promise<{success: boolean, fullResponse: string, error?: string}>}
  */
 export async function sendChatMessageStream(message, onChunk, chatId = null) {
@@ -98,7 +97,8 @@ export async function sendChatMessageStream(message, onChunk, chatId = null) {
       error: result.error,
       chatId: result.chatId,
       caseNumbers: result.caseNumbers,
-      contextSummary: result.contextSummary
+      contextSummary: result.contextSummary,
+      casesSummaryList: result.casesSummaryList // 판례 상세 정보 추가
     }
 
   } catch (error) {
@@ -114,14 +114,14 @@ export async function sendChatMessageStream(message, onChunk, chatId = null) {
 
 /**
  * 용어 변환 (법률 용어 → 일상 용어)
- * @param {string} SearchingLegalTerm - 법률 용어
+ * @param {string} legalTerm - 법률 용어
  * @returns {Promise<{success: boolean, data?: object, error?: string}>}
  */
-export async function translateLegalTerm(SearchingLegalTerm) {
+export async function translateLegalTerm(legalTerm) {
   try {
     console.log('📤 용어 변환 API 호출:', {
       url: `${API_BASE_URL}/terms/translate`,
-      legalTerm: SearchingLegalTerm
+      content: legalTerm
     })
     
     const response = await fetch(`${API_BASE_URL}/terms/translate`, {
@@ -130,7 +130,7 @@ export async function translateLegalTerm(SearchingLegalTerm) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        legalTerm: SearchingLegalTerm
+        content: legalTerm
       })
     })
 
@@ -166,17 +166,20 @@ export async function translateLegalTerm(SearchingLegalTerm) {
 
 /**
  * 사건 번호 검색
- * @param {number|string} caseNumber - 사건 번호
+ * @param {number|string} caseNumber - 사건 번호 (숫자)
  * @returns {Promise<{success: boolean, data?: object, error?: string}>}
  */
 export async function searchPrecedent(caseNumber) {
   try {
+    // 사건 번호를 숫자로 변환
+    const numericCaseNumber = parseInt(caseNumber)
+    
     console.log('📤 사건 검색 API 호출:', {
-      url: `${API_BASE_URL}/precedents/${caseNumber}`,
-      caseNumber: caseNumber
+      url: `${API_BASE_URL}/precedents/${numericCaseNumber}`,
+      caseNumber: numericCaseNumber
     })
     
-    const response = await fetch(`${API_BASE_URL}/precedents/${caseNumber}`, {
+    const response = await fetch(`${API_BASE_URL}/precedents/${numericCaseNumber}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
