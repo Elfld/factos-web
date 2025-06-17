@@ -15,11 +15,22 @@ export default function HomePage() {
 
   // ===== 카드 데이터 + 간격 설정 =====
   const cardSettings = {
-    height: '300px',
+    height: '360px',
     paddingVertical: '40px',
     paddingHorizontal: '32px',
     textMargin: '55px',
-    gap: '32px'
+    gap: '32px',
+    // 상대 위치 설정 (카드 내 절대 위치)
+    iconTop: '40px',
+    iconLeft: '32px',
+    titleTop: '128px',
+    titleLeft: '32px',
+    textTop: '168px',
+    textLeft: '32px',
+    textRight: '32px',
+    buttonBottom: '32px',
+    buttonLeft: '32px',
+    buttonRight: '32px'
   }
 
   const cardData = [
@@ -116,50 +127,66 @@ export default function HomePage() {
               style={{
                 background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
                 borderRadius: '20px',
-                padding: `${cardSettings.paddingVertical} ${cardSettings.paddingHorizontal}`,
                 boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
                 border: '1px solid #e5e7eb',
                 transition: 'all 0.3s ease',
-                display: 'flex',
-                flexDirection: 'column',
+                position: 'relative',  // ← relative로 변경 (절대 위치 기준점)
                 height: cardSettings.height,
                 minHeight: cardSettings.height
               }}
             >
+              {/* 아이콘 - 절대 위치 */}
               <div style={{
+                position: 'absolute',
+                top: cardSettings.iconTop,
+                left: cardSettings.iconLeft,
                 width: '64px',
                 height: '64px',
                 background: card.iconBg,
                 borderRadius: '16px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '24px',
-                flexShrink: '0'
+                justifyContent: 'center'
               }}>
                 {card.icon}
               </div>
               
+              {/* 제목 - 절대 위치 */}
               <h3 style={{ 
+                position: 'absolute',
+                top: cardSettings.titleTop,
+                left: cardSettings.titleLeft,
+                right: cardSettings.titleLeft,  // 좌우 동일한 여백
                 fontSize: '24px', 
                 fontWeight: '600', 
                 color: '#111827', 
-                margin: '0 0 12px 0',
-                flexShrink: '0'
+                margin: '0'
               }}>
                 {card.title}
               </h3>
               
+              {/* 텍스트 - 절대 위치 */}
               <p style={{ 
+                position: 'absolute',
+                top: cardSettings.textTop,
+                left: cardSettings.textLeft,
+                right: cardSettings.textRight,
                 fontSize: '16px', 
                 color: '#6b7280', 
-                margin: `0 0 ${cardSettings.textMargin} 0`,
+                margin: '0',
                 lineHeight: '1.6'
               }}>
                 {card.text}
               </p>
               
-              <Link href={card.href} style={{ textDecoration: 'none' }}>
+              {/* 버튼 - 절대 위치 */}
+              <Link href={card.href} style={{ 
+                position: 'absolute',
+                bottom: cardSettings.buttonBottom,
+                left: cardSettings.buttonLeft,
+                right: cardSettings.buttonRight,
+                textDecoration: 'none' 
+              }}>
                 <button 
                   className={`card-button card-button--${card.id}`}
                   style={{
@@ -177,8 +204,7 @@ export default function HomePage() {
                     justifyContent: 'center',
                     gap: '8px',
                     transition: 'all 0.2s',
-                    height: '56px',
-                    flexShrink: '0'
+                    height: '56px'
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.background = card.buttonHover
