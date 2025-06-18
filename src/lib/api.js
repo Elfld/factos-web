@@ -11,7 +11,7 @@ export async function sendChatMessage(message, chatId = null) {
   try {
     // chatId를 숫자로 변환 (기본값은 1)
     // const chatRoomId = chatId ? parseInt(chatId) : 1
-    const chatRoomId = 1
+    const chatRoomId = 3
     
     console.log('📤 채팅 API 호출:', {
       url: `${API_BASE_URL}/chat/${chatRoomId}/send`,
